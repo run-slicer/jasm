@@ -1,0 +1,10 @@
+[versions]
+jasm = "2.5.0"
+teavm = "0.10.0"
+
+[libraries]
+jasm-composition-jvm = { group = "com.github.jumanji144.Jasm", name = "jasm-composition-jvm", version.ref = "jasm" }
+teavm-core = { group = "org.teavm", name = "teavm-core", version.ref = "teavm" }
+
+[plugins]
+teavm = { id = "org.teavm", version.ref = "teavm" }
