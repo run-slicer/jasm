@@ -1,5 +1,5 @@
 [versions]
-jasm = "2.5.0"
+jasm = "2.6.0"
 teavm = "0.10.0"
 
 [libraries]

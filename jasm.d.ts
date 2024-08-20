@@ -3,5 +3,5 @@ declare module "@run-slicer/jasm" {
         indent?: string;
     }
 
-    export function disassemble(b: Uint8Array, config?: DisassemblyConfig): string;
+    export function disassemble(b: Uint8Array, config?: DisassemblyConfig): Promise<string>;
 }
