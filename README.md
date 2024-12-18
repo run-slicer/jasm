@@ -11,6 +11,7 @@ const { disassemble } = require("./jasm.js"); // get it from the dist/ directory
 const data = fs.readFileSync("./your/package/HelloWorld.class"); // read a class file
 console.log(disassemble(data, {
     indent: "    ", // the string that should be used as the indent, defaults to 4 spaces
+    signature: "main([Ljava/lang/String;)V", // disassemble a single method denoted by the signature
 }));
 ```
 

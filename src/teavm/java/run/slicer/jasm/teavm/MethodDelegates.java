@@ -59,7 +59,7 @@ public final class MethodDelegates {
         return new InvokeDynamic(name, Types.methodType(descriptor), methodHandle, args);
     }
 
-    public static void me_darknet_assembler_printer_InstructionPrinter_LTclinitGT() {
+    public static void me_darknet_assembler_printer_InstructionPrinter__clinit_() {
         setOpcodes(InstructionPrinter.class, MNEMONICS);
     }
 }

@@ -1,6 +1,6 @@
 [versions]
-jasm = "2.6.0"
-teavm = "0.10.0"
+jasm = "9a413ea936"
+teavm = "0.11.0"
 
 [libraries]
 jasm-composition-jvm = { group = "com.github.jumanji144.Jasm", name = "jasm-composition-jvm", version.ref = "jasm" }

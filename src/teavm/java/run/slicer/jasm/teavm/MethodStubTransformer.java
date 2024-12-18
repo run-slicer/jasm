@@ -17,7 +17,7 @@ public class MethodStubTransformer implements ClassHolderTransformer {
                         cls.getMethod(new MethodDescriptor("<clinit>", void.class)),
                         new MethodReference(
                                 "run.slicer.jasm.teavm.MethodDelegates",
-                                "me_darknet_assembler_printer_InstructionPrinter_LTclinitGT",
+                                "me_darknet_assembler_printer_InstructionPrinter__clinit_",
                                 ValueType.VOID
                         )
                 );

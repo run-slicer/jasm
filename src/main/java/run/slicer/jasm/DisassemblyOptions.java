@@ -6,4 +6,7 @@ import org.teavm.jso.JSObject;
 public interface DisassemblyOptions extends JSObject {
     @JSBody(script = "return this.indent || '    ';") // 4 spaces
     String indent();
+
+    @JSBody(script = "return this.signature || null;")
+    String signature();
 }
