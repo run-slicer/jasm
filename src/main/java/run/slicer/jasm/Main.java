@@ -10,6 +10,7 @@ import me.darknet.assembler.printer.JvmClassPrinter;
 import me.darknet.assembler.printer.JvmMethodPrinter;
 import me.darknet.assembler.printer.PrintContext;
 import org.teavm.jso.JSByRef;
+import org.teavm.jso.JSExceptions;
 import org.teavm.jso.JSExport;
 import org.teavm.jso.core.JSObjects;
 import org.teavm.jso.core.JSPromise;
@@ -43,7 +44,7 @@ public class Main {
 
                     resolve.accept(JSString.valueOf(ctx.toString()));
                 } catch (Throwable e) {
-                    reject.accept(e);
+                    reject.accept(JSExceptions.getJSException(e));
                 }
             }).start();
         });

@@ -49,4 +49,38 @@ public final class MetaAccessors {
             throw new RuntimeException("Could not find OPCODES field");
         }
     }
+
+    @Meta
+    public static native void setBlwOpcodes(Class<?> cls, Object val);
+
+    private static void setBlwOpcodes(ReflectClass<Object> cls, Value<Object> val) {
+        if (!cls.getName().equals("me.darknet.assembler.util.BlwOpcodes")) {
+            unsupportedCase();
+            return;
+        }
+
+        final ReflectField field = cls.getDeclaredField("opcodes");
+        if (field != null) {
+            emit(() -> field.set(null, val));
+        } else {
+            throw new RuntimeException("Could not find opcodes field");
+        }
+    }
+
+    @Meta
+    public static native void setBlwFilteredOpcodes(Class<?> cls, Object val);
+
+    private static void setBlwFilteredOpcodes(ReflectClass<Object> cls, Value<Object> val) {
+        if (!cls.getName().equals("me.darknet.assembler.util.BlwOpcodes")) {
+            unsupportedCase();
+            return;
+        }
+
+        final ReflectField field = cls.getDeclaredField("filteredOpcodes");
+        if (field != null) {
+            emit(() -> field.set(null, val));
+        } else {
+            throw new RuntimeException("Could not find filteredOpcodes field");
+        }
+    }
 }

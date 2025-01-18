@@ -7,14 +7,16 @@ import dev.xdark.blw.type.InvokeDynamic;
 import dev.xdark.blw.type.MethodHandle;
 import dev.xdark.blw.type.Types;
 import me.darknet.assembler.printer.InstructionPrinter;
+import me.darknet.assembler.util.BlwOpcodes;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.Handle;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static run.slicer.jasm.teavm.MetaAccessors.getBootstrapMethods;
-import static run.slicer.jasm.teavm.MetaAccessors.setOpcodes;
+import static run.slicer.jasm.teavm.MetaAccessors.*;
 
 public final class MethodDelegates {
     private static final String[] MNEMONICS = new String[]{
@@ -61,5 +63,25 @@ public final class MethodDelegates {
 
     public static void me_darknet_assembler_printer_InstructionPrinter__clinit_() {
         setOpcodes(InstructionPrinter.class, MNEMONICS);
+    }
+
+    public static void me_darknet_assembler_util_BlwOpcodes__clinit_() {
+        final Map<String, Integer> opcodes = new HashMap<>();
+        for (int i = 0; i < MNEMONICS.length; i++) {
+            opcodes.put(MNEMONICS[i], i);
+        }
+        opcodes.put("line", -1);
+
+        final Map<String, Integer> filteredOpcodes = new HashMap<>(opcodes);
+        filteredOpcodes.remove("ldc_w");
+        filteredOpcodes.remove("ldc2_w");
+        filteredOpcodes.remove("jsr");
+        filteredOpcodes.remove("ret");
+        filteredOpcodes.put("invokestaticinterface", 184);
+        filteredOpcodes.put("invokevirtualinterface", 185);
+        filteredOpcodes.put("invokespecialinterface", 183);
+
+        setBlwOpcodes(BlwOpcodes.class, opcodes);
+        setBlwFilteredOpcodes(BlwOpcodes.class, filteredOpcodes);
     }
 }

@@ -22,6 +22,16 @@ public class MethodStubTransformer implements ClassHolderTransformer {
                         )
                 );
             }
+            case "me.darknet.assembler.util.BlwOpcodes" -> {
+                this.stubWithCall(
+                        cls.getMethod(new MethodDescriptor("<clinit>", void.class)),
+                        new MethodReference(
+                                "run.slicer.jasm.teavm.MethodDelegates",
+                                "me_darknet_assembler_util_BlwOpcodes__clinit_",
+                                ValueType.VOID
+                        )
+                );
+            }
         }
     }
 
