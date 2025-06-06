@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.3.1"
+val thisVersion = "0.4.0"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.jasm.get()}"
@@ -24,19 +24,19 @@ java.toolchain {
     languageVersion = JavaLanguageVersion.of(21)
 }
 
-teavm.js {
+teavm.wasmGC {
     mainClass = "run.slicer.jasm.Main"
-    moduleType = org.teavm.gradle.api.JSModuleType.ES2015
-    // obfuscated = false
-    // optimization = org.teavm.gradle.api.OptimizationLevel.NONE
+    obfuscated = false
 }
 
 tasks {
     register<Copy>("copyDist") {
         group = "build"
 
-        from("README.md", "LICENSE", "LICENSE-JASM", generateJavaScript, "jasm.d.ts")
+        from("README.md", "LICENSE", "LICENSE-JASM", generateWasmGC, copyWasmGCRuntime, "jasm.js", "jasm.d.ts")
         into("dist")
+
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         doLast {
             file("dist/package.json").writeText(
@@ -58,6 +58,10 @@ tasks {
                     }
                 """.trimIndent()
             )
+        }
+        doLast {
+            // patch in module support
+            file("dist/jasm.wasm-runtime.js").appendText("export { TeaVM };")
         }
     }
 
