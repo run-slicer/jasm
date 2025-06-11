@@ -14,9 +14,6 @@
  *  limitations under the License.
  */
 
-var TeaVM = TeaVM || {};
-TeaVM.wasmGC = TeaVM.wasmGC || (() => {
-    
 let globalsCache = new Map();
 let stackDeobfuscator = null;
 let exceptionFrameRegex = /.+\.wasm:wasm-function\[[0-9]+]:0x([0-9a-f]+).*/;
@@ -632,20 +629,20 @@ function wrapImport(importObj) {
 }
 
 // patch start
-async function readImports(wasmModule, path) {
+async function readImports(wasmModule, src) {
     try {
         return WebAssembly.Module.imports(wasmModule);
     } catch (e) {
         const { parseImports } = await import("./wasm-imports-parser.js");
-        return parseImports(await (await fetch(path)).arrayBuffer());
+        return parseImports(typeof src === "string" ? await (await fetch(src)).arrayBuffer() : src);
     }
 }
 // patch end
 
-async function wrapImports(wasmModule, imports, path) { // patch - path
+async function wrapImports(wasmModule, imports, src) { // patch - src
     let promises = [];
     let propertiesToAdd = {};
-    for (let { module, name, kind } of await readImports(wasmModule, path)) { // patch - readImports
+    for (let { module, name, kind } of await readImports(wasmModule, src)) { // patch - readImports
         if (kind !== "global" || module in imports) {
             continue;
         }
@@ -675,17 +672,20 @@ async function wrapImports(wasmModule, imports, path) { // patch - path
     await Promise.all(promises);
 }
 
-async function load(path, options) {
+async function load(src, options) {
     if (!options) {
         options = {};
     }
 
     let deobfuscatorOptions = options.stackDeobfuscator || {};
     let debugInfoLocation = deobfuscatorOptions.infoLocation || "auto";
+    let compilationPromise = typeof src === "string"
+        ? WebAssembly.compileStreaming(fetch(src), { builtins: ["js-string"] })
+        : WebAssembly.compile(src, { builtins: ["js-string"] });
     let [deobfuscatorFactory, module, debugInfo] = await Promise.all([
-        deobfuscatorOptions.enabled ? getDeobfuscator(path, deobfuscatorOptions) : Promise.resolve(null),
-        WebAssembly.compileStreaming(fetch(path), { builtins: ["js-string"] }),
-        fetchExternalDebugInfo(path, debugInfoLocation, deobfuscatorOptions)
+        deobfuscatorOptions.enabled ? getDeobfuscator(src, deobfuscatorOptions) : Promise.resolve(null),
+        compilationPromise,
+        fetchExternalDebugInfo(src, debugInfoLocation, deobfuscatorOptions)
     ]);
 
     const importObj = {};
@@ -695,7 +695,7 @@ async function load(path, options) {
         options.installImports(importObj);
     }
     if (!options.noAutoImports) {
-        await wrapImports(module, importObj, path); // patch - path
+        await wrapImports(module, importObj, src); // patch - src
     }
     let instance = await WebAssembly.instantiate(module, importObj);
 
@@ -742,6 +742,9 @@ function hasStringBuiltins() {
 }
 
 async function getDeobfuscator(path, options) {
+    if (typeof path !== "string") {
+        return null;
+    }
     try {
         const importObj = {};
         const defaultsResult = defaults(importObj, {});
@@ -790,7 +793,7 @@ function createDeobfuscator(module, externalData, deobfuscatorFactory) {
 }
 
 async function fetchExternalDebugInfo(path, debugInfoLocation, options) {
-    if (!options.enabled) {
+    if (!options.enabled || typeof path !== "string") {
         return null;
     }
     if (debugInfoLocation !== "auto" && debugInfoLocation !== "external") {
@@ -803,7 +806,5 @@ async function fetchExternalDebugInfo(path, debugInfoLocation, options) {
     }
     return new Int8Array(await response.arrayBuffer());
 }
-    return { load, defaults, wrapImport };
-})();
 
-export { TeaVM };
+export { load, defaults, wrapImport };
