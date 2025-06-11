@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.4.0"
+val thisVersion = "0.4.1"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.jasm.get()}"
@@ -35,7 +35,10 @@ tasks {
     register<Copy>("copyDist") {
         group = "build"
 
-        from("README.md", "LICENSE", "LICENSE-JASM", generateWasmGC, copyWasmGCRuntime, "jasm.js", "jasm.d.ts")
+        from(
+            "README.md", "LICENSE", "LICENSE-JASM", generateWasmGC, "jasm.wasm-runtime.js",
+            "wasm-imports-parser.js", "wasm-imports-parser.d.ts", "jasm.js", "jasm.d.ts"
+        )
         into("dist")
 
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
