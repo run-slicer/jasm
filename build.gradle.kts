@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.4.2"
+val thisVersion = "0.4.3"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.jasm.get()}"

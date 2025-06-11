@@ -36,21 +36,12 @@ export function parseImports(moduleBytes) {
     parseMagicNumber(parseState);
     parseVersion(parseState);
 
-    const types = [];
     const imports = [];
 
     while (parseState.hasMoreBytes()) {
         const sectionId = parseState.readByte();
         const sectionSize = parseState.readUnsignedLEB128();
         switch (sectionId) {
-            case 1: {
-                // Type section
-                const typeCount = parseState.readUnsignedLEB128();
-                for (let i = 0; i < typeCount; i++) {
-                    types.push(parseFunctionType(parseState));
-                }
-                break;
-            }
             case 2: {
                 // Ok, found import section
                 const importCount = parseState.readUnsignedLEB128();
@@ -60,17 +51,20 @@ export function parseImports(moduleBytes) {
                     const type = parseState.readByte();
                     switch (type) {
                         case 0x00:
-                            const index = parseState.readUnsignedLEB128();
-                            imports.push({ module, name, kind: "function", type: types[index] });
+                            parseState.readUnsignedLEB128(); // index
+                            imports.push({ module, name, kind: "function" });
                             break;
                         case 0x01:
-                            imports.push({ module, name, kind: "table", type: parseTableType(parseState) });
+                            imports.push({ module, name, kind: "table" });
+                            parseTableType(parseState);
                             break;
                         case 0x02:
-                            imports.push({ module, name, kind: "memory", type: parseLimits(parseState) });
+                            imports.push({ module, name, kind: "memory" });
+                            parseLimits(parseState);
                             break;
                         case 0x03:
-                            imports.push({ module, name, kind: "global", type: parseGlobalType(parseState) });
+                            imports.push({ module, name, kind: "global" });
+                            parseGlobalType(parseState)
                             break;
                         default:
                             throw new Error(`Unknown import descriptor type ${type}`);
@@ -151,83 +145,24 @@ function parseVersion(parseState) {
 }
 
 function parseTableType(parseState) {
-    const elementType = parseState.readByte();
-    let element;
-    switch (elementType) {
-        case 0x70:
-            element = "funcref";
-            break;
-        case 0x6F:
-            element = "externref";
-            break;
-        default:
-            throw new Error(`Unknown table element type ${elementType}`);
-    }
-    const { minimum, maximum } = parseLimits(parseState);
-    if (maximum) {
-        return { element, minimum, maximum };
-    } else {
-        return { element, minimum };
-    }
+    parseState.skipBytes(1);
+    parseLimits(parseState);
 }
 
 function parseLimits(parseState) {
     const flags = parseState.readByte();
-    const minimum = parseState.readUnsignedLEB128();
+    parseState.readUnsignedLEB128(); // minimum
     const hasMaximum = flags & 1;
-    const shared = (flags & 2) !== 0;
-    const isMemory64 = (flags & 4) !== 0;
-    const index = isMemory64 ? "i64" : "i32";
     if (hasMaximum) {
-        const maximum = parseState.readUnsignedLEB128();
-        return { minimum, shared, index, maximum };
-    } else {
-        return { minimum, shared, index };
+        parseState.readUnsignedLEB128(); // maximum
     }
 }
 
 function parseGlobalType(parseState) {
-    const value = parseValueType(parseState);
-    const mutable = parseState.readByte() === 1;
-    return { value, mutable };
+    parseValueType(parseState);
+    parseState.skipBytes(1);
 }
 
 function parseValueType(parseState) {
-    const type = parseState.readByte();
-    switch (type) {
-        case 0x7F:
-            return "i32";
-        case 0x7E:
-            return "i64";
-        case 0x7D:
-            return "f32";
-        case 0x7C:
-            return "f64";
-        case 0x70:
-            return "funcref";
-        case 0x6f:
-            return "externref";
-        case 0x7B:
-            return "v128";
-        default:
-            throw new Error(`Unknown value type ${type}`);
-    }
-}
-
-function parseFunctionType(parseState) {
-    const form = parseState.readByte();
-    if (form !== 0x60) {
-        throw new Error(`Expected function type form 0x60, got ${form}`);
-    }
-    const parameters = [];
-    const parameterCount = parseState.readUnsignedLEB128();
-    for (let i = 0; i < parameterCount; i++) {
-        parameters.push(parseValueType(parseState));
-    }
-    const results = [];
-    const resultCount = parseState.readUnsignedLEB128();
-    for (let i = 0; i < resultCount; i++) {
-        results.push(parseValueType(parseState));
-    }
-    return { parameters, results };
+    parseState.skipBytes(1);
 }
