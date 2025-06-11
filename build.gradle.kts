@@ -12,6 +12,7 @@ description = "A JavaScript port of the Jasm dis/assembler."
 repositories {
     mavenCentral()
     maven("https://jitpack.io")
+    maven("https://teavm.org/maven/repository")
 }
 
 dependencies {
@@ -26,7 +27,8 @@ java.toolchain {
 
 teavm.wasmGC {
     mainClass = "run.slicer.jasm.Main"
-    obfuscated = false
+    modularRuntime = true
+    // obfuscated = false
 }
 
 tasks {
@@ -58,10 +60,6 @@ tasks {
                     }
                 """.trimIndent()
             )
-        }
-        doLast {
-            // patch in module support
-            file("dist/jasm.wasm-runtime.js").appendText("export { TeaVM };")
         }
     }
 
