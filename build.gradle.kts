@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.4.3"
+val thisVersion = "0.4.4"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.jasm.get()}"
@@ -34,14 +34,14 @@ teavm.wasmGC {
 tasks {
     register<Copy>("copyDist") {
         group = "build"
-        dependsOn(generateWasmGC)
 
         from(
             "README.md", "LICENSE", "LICENSE-JASM", "jasm.js", "jasm.d.ts",
-            layout.buildDirectory.file("generated/teavm/wasm-gc/jasm.wasm"),
-            "wasm-runtime/runtime.js", "wasm-runtime/wasm-imports-parser.js"
+            copyWasmGCRuntime, generateWasmGC
         )
         into("dist")
+
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         doLast {
             file("dist/package.json").writeText(
@@ -68,5 +68,9 @@ tasks {
 
     build {
         dependsOn("copyDist")
+    }
+
+    clean {
+        delete("dist")
     }
 }
