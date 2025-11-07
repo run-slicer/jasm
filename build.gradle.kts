@@ -3,7 +3,7 @@ plugins {
     alias(libs.plugins.teavm) // order matters?
 }
 
-val thisVersion = "0.4.4"
+val thisVersion = "0.4.5"
 
 group = "run.slicer"
 version = "$thisVersion-${libs.versions.jasm.get()}"
@@ -11,6 +11,7 @@ description = "A JavaScript port of the Jasm dis/assembler."
 
 repositories {
     mavenCentral()
+    mavenLocal()
     maven("https://jitpack.io")
     maven("https://teavm.org/maven/repository")
 }
